@@ -6,3 +6,5 @@ Creates a mosaic layer in current map from downloaded data with included scripts
 
 Virginia DEM Created from toolbox, with ArcGIS Pro's symbology and Extract by Mask tools.
 ![alt text](https://github.com/rhsmith33/Copernicus_DEM_Mosiac/blob/main/Virginia.png?raw=true)
+
+Requires AWS account and ArcGIS Pro license.
