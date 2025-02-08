@@ -114,9 +114,17 @@ class DEMTool:
         northings_list = []
         eastings_list = []
 
-        #Extra steps are made for eastings as they can be negative
-        for i in range(parameters[0].value - (parameters[1].value - 1)):
-            northings.append(parameters[0].value - i)
+        if (abs(parameters[0].value) >= abs(parameters[1].value) and parameters[1].value > 0):
+            for i in range(parameters[0].value - (parameters[1].value - 1)):
+                northings.append(parameters[0].value - i)
+                
+        elif (abs(parameters[0].value) < abs(parameters[1].value) and parameters[0].value > 0):
+            for i in range(abs(parameters[1].value - (parameters[0].value + 1))):
+                northings.append(parameters[1].value - i)
+
+        elif (abs(parameters[0].value) < abs(parameters[1].value) and parameters[0].value < 0):
+            for i in range(abs(parameters[1].value - (parameters[0].value + 1))):
+                northings.append(parameters[0].value - i)
 
         if (abs(parameters[2].value) >= abs(parameters[3].value) and parameters[3].value > 0):
             for i in range(parameters[2].value - (parameters[3].value - 1)):
@@ -131,21 +139,31 @@ class DEMTool:
                 eastings.append(parameters[2].value - i)
 
         for i in northings:
-            northings_list.append(f"_N{i}_00_")
+            if (i >= 10 and parameters[0].value >= parameters[1].value):
+                northings_list.append(f"_N{i}_00_")
+            elif (i >= 10):
+                northings_list.append(f"_S{i}_00_")
+            elif (parameters[0].value >= parameters[1].value):
+                northings_list.append(f"_N0{i}_00_")
+            else:
+                northings_list.append(f"_S0{i}_00_")
 
         for i in eastings:
-            if (i >= 100) :
+            if (i >= 100 and parameters[2].value >= parameters[3].value):
                 eastings_list.append(f"E{i}_00_")
             elif (i >= 100):
-                eastings_list.append(f"W{abs(i)}_00_")  
-            elif (i < 0) :
-                eastings_list.append(f"W0{abs(i)}_00_")
-            else :
+                eastings_list.append(f"W{abs(i)}_00_") 
+            elif (i >= 10 and parameters[2].value >= parameters[3].value):
                 eastings_list.append(f"E0{abs(i)}_00_")
-                
+            elif (i >= 10):
+                eastings_list.append(f"W0{abs(i)}_00_")
+            elif (parameters[2].value >= parameters[3].value):
+                eastings_list.append(f"E00{i}_00_")
+            else:
+                eastings_list.append(f"W00{abs(i)}_00_")       
         #Create all combinations of northings and eastings
         tiles = [f"{x}{y}" for x in northings_list for y in eastings_list]
-            
+           
         for i in tiles:
             DEMTool.keys.append(f"Copernicus_DSM_COG_10{i}DEM/")
 
@@ -174,8 +192,6 @@ class DEMTool:
                         folders.append(key)
                     else:
                         file_names.append(key)
-            else :
-                next_token = response.get("NextContinuationToken")
 
             next_token = response.get("NextContinuationToken")
 
@@ -413,7 +429,7 @@ class MosaicLayer:
 
     def execute(self, parameters, messages):
         arcpy.env.workspace = parameters[3].valueAsText
-        MosaicLayer.addMosiacLayer(parameters)
+        MosaicLayer.addMosaicLayer(parameters)
         return
 
     def postExecute(self, parameters):
